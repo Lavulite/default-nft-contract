@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0 <0.9.0;
 
+import "../../libs/TokenSupplier/TokenUriSupplier.sol";
 import "../../libs/donate/DonateWithdraw.sol";
 import "erc721psi/contracts/extension/ERC721PsiBurnable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
@@ -12,7 +13,8 @@ abstract contract BasicNonFungibleSBT is
     Ownable,
     ERC721PsiBurnable,
     ERC721MultiSaleByMerkleMultiWallet,
-    DonateWithdraw
+    DonateWithdraw,
+    TokenUriSupplier
 {
     // ==================================================================
     // Constants
@@ -111,6 +113,14 @@ abstract contract BasicNonFungibleSBT is
         }
     }
 
+    function burn(uint256[] calldata ids) external {
+        require(ids.length > 0, "ids is empty.");
+        for(uint256 i = 0; i < ids.length; i++){
+            require(ownerOf(ids[i]) == msg.sender, "you are not owner.");
+            _burn(ids[i]);
+        }
+    }
+
     // == For sale ==
     function claim(
         uint256 userId,
@@ -195,6 +205,43 @@ abstract contract BasicNonFungibleSBT is
     function setDonationRate(uint256 value) public onlyRole(ADMIN) {
         require(value <= MAX_DONATION_RATE, "donation rate is over 100%");
         donationRate = value;
+    }
+
+    // ==================================================================
+    // override TokenUriSupplier
+    // ==================================================================
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        virtual
+        override(TokenUriSupplier, ERC721Psi)
+        returns (string memory)
+    {
+        return TokenUriSupplier.tokenURI(tokenId);
+    }
+
+    function setBaseURI(string memory _value)
+        external
+        override
+        onlyRole(ADMIN)
+    {
+        baseURI = _value;
+    }
+
+    function setBaseExtension(string memory _value)
+        external
+        override
+        onlyRole(ADMIN)
+    {
+        baseExtension = _value;
+    }
+
+    function setExternalSupplier(address _value)
+        external
+        override
+        onlyRole(ADMIN)
+    {
+        externalSupplier = ITokenUriSupplier(_value);
     }
 
     // ==================================================================

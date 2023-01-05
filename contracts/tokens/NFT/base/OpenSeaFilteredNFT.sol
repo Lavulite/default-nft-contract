@@ -22,6 +22,7 @@ abstract contract OpenSeaFilteredNFT is
     // ==================================================================
     function setApprovalForAll(address operator, bool approved)
         public
+        virtual
         override
         onlyAllowedOperatorApproval(operator)
     {
@@ -30,6 +31,7 @@ abstract contract OpenSeaFilteredNFT is
 
     function approve(address operator, uint256 tokenId)
         public
+        virtual
         override
         onlyAllowedOperatorApproval(operator)
     {
@@ -40,7 +42,7 @@ abstract contract OpenSeaFilteredNFT is
         address from,
         address to,
         uint256 tokenId
-    ) public override onlyAllowedOperator(from) {
+    ) public virtual override onlyAllowedOperator(from) {
         super.transferFrom(from, to, tokenId);
     }
 
@@ -48,7 +50,7 @@ abstract contract OpenSeaFilteredNFT is
         address from,
         address to,
         uint256 tokenId
-    ) public override onlyAllowedOperator(from) {
+    ) public virtual override onlyAllowedOperator(from) {
         super.safeTransferFrom(from, to, tokenId);
     }
 
@@ -57,7 +59,7 @@ abstract contract OpenSeaFilteredNFT is
         address to,
         uint256 tokenId,
         bytes memory data
-    ) public override onlyAllowedOperator(from) {
+    ) public virtual override onlyAllowedOperator(from) {
         super.safeTransferFrom(from, to, tokenId, data);
     }
 
@@ -74,7 +76,10 @@ abstract contract OpenSeaFilteredNFT is
     // ==================================================================
     // For IERC2981 NFT Royalty Standard
     // ==================================================================
-    function setDefaultRoyalty(address payable recipient, uint96 value) public onlyRole(ADMIN) {
+    function setDefaultRoyalty(address payable recipient, uint96 value)
+        public
+        onlyRole(ADMIN)
+    {
         royaltyFee = value;
         _setDefaultRoyalty(recipient, royaltyFee);
     }
